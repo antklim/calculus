@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 class CalculusScreen extends StatefulWidget {
@@ -72,6 +74,7 @@ class MemoryInfo extends StatelessWidget {
 }
 
 enum Operation { addition, subtraction, division, multiplication, sqrt }
+enum Operand { A, B }
 
 class CalculatorInput extends StatefulWidget {
   @override
@@ -88,11 +91,59 @@ class _CalculatorInputState extends State<CalculatorInput> {
   };
 
   Operation operation = Operation.addition;
+  num operandA = 0;
+  num operandB = 0;
 
   void onOperationChanged(Operation newOperation) {
     setState(() {
       operation = newOperation;
     });
+  }
+
+  ValueChanged<String> onOperandChanged(Operand operand) => (String v) {
+        double value = double.tryParse(v) ?? 0;
+        setState(() {
+          if (operand == Operand.A) {
+            operandA = value;
+          }
+          if (operand == Operand.B) {
+            operandB = value;
+          }
+        });
+      };
+
+  num get value {
+    switch (operation) {
+      case Operation.addition:
+        return operandA + operandB;
+      case Operation.subtraction:
+        return operandA - operandB;
+      case Operation.multiplication:
+        return operandA * operandB;
+      case Operation.division:
+        return operandA / operandB;
+      case Operation.sqrt:
+        return sqrt(operandA);
+      default:
+        return 0;
+    }
+  }
+
+  String get format {
+    switch (operation) {
+      case Operation.addition:
+        return '$operandA + $operandB';
+      case Operation.subtraction:
+        return '$operandA - $operandB';
+      case Operation.multiplication:
+        return '$operandA * $operandB';
+      case Operation.division:
+        return '$operandA / $operandB';
+      case Operation.sqrt:
+        return 'sqrt($operandA)';
+      default:
+        return '';
+    }
   }
 
   @override
@@ -115,32 +166,38 @@ class _CalculatorInputState extends State<CalculatorInput> {
               ),
             ],
           ),
-          Operand(label: 'Operand A', initValue: 0),
+          OperandInput(
+              label: 'Operand A',
+              initValue: operandA,
+              onChanged: onOperandChanged(Operand.A)),
           operation == Operation.sqrt
               ? SizedBox(height: 68)
-              : Operand(label: 'Operand B', initValue: 0),
+              : OperandInput(
+                  label: 'Operand B',
+                  initValue: operandB,
+                  onChanged: onOperandChanged(Operand.B)),
           Container(
               margin: const EdgeInsets.only(top: 10, bottom: 20),
-              child: Text(
-                '(1 + 2) = 3',
-              )),
+              child: Text('$format = ${value.toStringAsFixed(3)}')),
         ],
       ),
     );
   }
 }
 
-class Operand extends StatefulWidget {
+class OperandInput extends StatefulWidget {
   final String label;
   final num initValue;
+  final ValueChanged<String> onChanged;
 
-  const Operand({Key key, this.label, this.initValue}) : super(key: key);
+  const OperandInput({Key key, this.label, this.initValue, this.onChanged})
+      : super(key: key);
 
   @override
-  _OperandState createState() => _OperandState();
+  _OperandInputState createState() => _OperandInputState();
 }
 
-class _OperandState extends State<Operand> {
+class _OperandInputState extends State<OperandInput> {
   TextEditingController controller;
 
   @override
@@ -166,6 +223,7 @@ class _OperandState extends State<Operand> {
               controller: controller,
               keyboardType: TextInputType.number,
               textAlign: TextAlign.end,
+              onChanged: widget.onChanged,
             ),
           ),
           Padding(
