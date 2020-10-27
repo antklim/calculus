@@ -2,6 +2,8 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
+import 'use_case.dart';
+
 class CalculusScreen extends StatefulWidget {
   @override
   _CalculusScreenState createState() => _CalculusScreenState();
@@ -80,7 +82,6 @@ class MemoryInfo extends StatelessWidget {
   }
 }
 
-enum Operation { addition, subtraction, division, multiplication, sqrt }
 enum Operand { A, B }
 
 class CalculatorInput extends StatefulWidget {
