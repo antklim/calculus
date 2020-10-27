@@ -104,63 +104,27 @@ class _CalculatorInputState extends State<CalculatorInput> {
     Operation.sqrt: 'Square root',
   };
 
-  Operation operation = Operation.addition;
-  num operandA = 0;
-  num operandB = 0;
+  CalculatorUseCase useCase = CalculatorUseCase();
 
   void onOperationChanged(Operation newOperation) {
     setState(() {
-      operation = newOperation;
+      useCase.operation = newOperation;
     });
-    widget.onChanged(calculatorValue);
+    widget.onChanged(useCase.value);
   }
 
   ValueChanged<String> onOperandChanged(Operand operand) => (String v) {
         double value = double.tryParse(v) ?? 0;
         setState(() {
           if (operand == Operand.A) {
-            operandA = value;
+            useCase.operandA = value;
           }
           if (operand == Operand.B) {
-            operandB = value;
+            useCase.operandB = value;
           }
         });
-        widget.onChanged(calculatorValue);
+        widget.onChanged(useCase.value);
       };
-
-  num get calculatorValue {
-    switch (operation) {
-      case Operation.addition:
-        return operandA + operandB;
-      case Operation.subtraction:
-        return operandA - operandB;
-      case Operation.multiplication:
-        return operandA * operandB;
-      case Operation.division:
-        return operandA / operandB;
-      case Operation.sqrt:
-        return sqrt(operandA);
-      default:
-        return 0;
-    }
-  }
-
-  String get calculatorFormat {
-    switch (operation) {
-      case Operation.addition:
-        return '$operandA + $operandB';
-      case Operation.subtraction:
-        return '$operandA - $operandB';
-      case Operation.multiplication:
-        return '$operandA * $operandB';
-      case Operation.division:
-        return '$operandA / $operandB';
-      case Operation.sqrt:
-        return 'sqrt($operandA)';
-      default:
-        return '';
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -173,7 +137,7 @@ class _CalculatorInputState extends State<CalculatorInput> {
             children: <Widget>[
               Text('Operation', style: Theme.of(context).textTheme.bodyText2),
               DropdownButton(
-                value: operation,
+                value: useCase.operation,
                 items: operations.entries
                     .map((entry) => DropdownMenuItem(
                         child: Text(entry.value), value: entry.key))
@@ -184,20 +148,20 @@ class _CalculatorInputState extends State<CalculatorInput> {
           ),
           OperandInput(
               label: 'Operand A',
-              initValue: operandA,
+              initValue: useCase.operandA,
               memory: widget.memory,
               onChanged: onOperandChanged(Operand.A)),
-          operation == Operation.sqrt
+          useCase.operation == Operation.sqrt
               ? SizedBox(height: 68)
               : OperandInput(
                   label: 'Operand B',
-                  initValue: operandB,
+                  initValue: useCase.operandB,
                   memory: widget.memory,
                   onChanged: onOperandChanged(Operand.B)),
           Container(
               margin: const EdgeInsets.only(top: 10, bottom: 20),
               child: Text(
-                  '$calculatorFormat = ${calculatorValue.toStringAsFixed(3)}')),
+                  '${useCase.format} = ${useCase.value.toStringAsFixed(3)}')),
         ],
       ),
     );
