@@ -45,4 +45,11 @@ class CalculatorUseCase {
         return '';
     }
   }
+
+  ///
+  /// User sets operation.
+  ///
+  void setOperation(Operation value) {
+    operation = value;
+  }
 }

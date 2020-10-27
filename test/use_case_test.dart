@@ -46,5 +46,14 @@ void main() {
         });
       });
     });
+
+    test('sets operation', () {
+      CalculatorUseCase useCase = CalculatorUseCase(
+          operation: Operation.addition, operandA: 1, operandB: 2);
+
+      expect(useCase.value, 3);
+      useCase.setOperation(Operation.subtraction);
+      expect(useCase.value, -1);
+    });
   });
 }

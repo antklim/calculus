@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 
 import 'use_case.dart';
@@ -108,7 +106,7 @@ class _CalculatorInputState extends State<CalculatorInput> {
 
   void onOperationChanged(Operation newOperation) {
     setState(() {
-      useCase.operation = newOperation;
+      useCase.setOperation(newOperation);
     });
     widget.onChanged(useCase.value);
   }
