@@ -90,11 +90,66 @@ class _CalculatorInputState extends State<CalculatorInput> {
               ),
             ],
           ),
+          Operand(label: 'Operand A', initValue: 0),
+          operation == Operation.sqrt
+              ? SizedBox(height: 68)
+              : Operand(label: 'Operand B', initValue: 0),
           Container(
               margin: const EdgeInsets.only(top: 10, bottom: 20),
               child: Text(
                 '(1 + 2) = 3',
               )),
+        ],
+      ),
+    );
+  }
+}
+
+class Operand extends StatefulWidget {
+  final String label;
+  final num initValue;
+
+  const Operand({Key key, this.label, this.initValue}) : super(key: key);
+
+  @override
+  _OperandState createState() => _OperandState();
+}
+
+class _OperandState extends State<Operand> {
+  TextEditingController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = TextEditingController(text: '${widget.initValue}');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(top: 10, bottom: 10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: Text(widget.label,
+                style: Theme.of(context).textTheme.bodyText2),
+          ),
+          Flexible(
+            child: TextField(
+              controller: controller,
+              keyboardType: TextInputType.number,
+              textAlign: TextAlign.end,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 8.0),
+            child: RaisedButton(
+                onPressed: () {},
+                child: Text('From memory',
+                    style: Theme.of(context).textTheme.button)),
+          ),
         ],
       ),
     );
