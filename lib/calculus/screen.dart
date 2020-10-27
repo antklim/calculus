@@ -1,6 +1,34 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
-class CalculusScreen extends StatelessWidget {
+class CalculusScreen extends StatefulWidget {
+  @override
+  _CalculusScreenState createState() => _CalculusScreenState();
+}
+
+class _CalculusScreenState extends State<CalculusScreen> {
+  num memory;
+  num calculatorValue;
+
+  void onCalulatorResultChanged(num value) {
+    setState(() {
+      calculatorValue = value;
+    });
+  }
+
+  void onMemorise() {
+    setState(() {
+      memory = calculatorValue;
+    });
+  }
+
+  void onResetMemory() {
+    setState(() {
+      memory = null;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -11,9 +39,11 @@ class CalculusScreen extends StatelessWidget {
             children: <Widget>[
               Header(),
               Divider(indent: 10.0, endIndent: 10.0, height: 8.0),
-              MemoryInfo(),
-              CalculatorInput(),
-              MemoryManagement(),
+              MemoryInfo(memory: memory),
+              CalculatorInput(
+                  memory: memory, onChanged: onCalulatorResultChanged),
+              MemoryManagement(
+                  onMemorise: onMemorise, onResetMemory: onResetMemory),
             ],
           ),
         ),
@@ -36,19 +66,30 @@ class Header extends StatelessWidget {
 }
 
 class MemoryInfo extends StatelessWidget {
+  final num memory;
+
+  const MemoryInfo({Key key, this.memory}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Container(
       alignment: Alignment.center,
-      child: Text('In memory: <Some data in memory>',
+      child: Text('In memory: ${memory ?? ''}',
           style: Theme.of(context).textTheme.bodyText1),
     );
   }
 }
 
 enum Operation { addition, subtraction, division, multiplication, sqrt }
+enum Operand { A, B }
 
 class CalculatorInput extends StatefulWidget {
+  final num memory;
+  final ValueChanged<num> onChanged;
+
+  const CalculatorInput({Key key, this.memory, this.onChanged})
+      : super(key: key);
+
   @override
   _CalculatorInputState createState() => _CalculatorInputState();
 }
@@ -63,11 +104,61 @@ class _CalculatorInputState extends State<CalculatorInput> {
   };
 
   Operation operation = Operation.addition;
+  num operandA = 0;
+  num operandB = 0;
 
   void onOperationChanged(Operation newOperation) {
     setState(() {
       operation = newOperation;
     });
+    widget.onChanged(calculatorValue);
+  }
+
+  ValueChanged<String> onOperandChanged(Operand operand) => (String v) {
+        double value = double.tryParse(v) ?? 0;
+        setState(() {
+          if (operand == Operand.A) {
+            operandA = value;
+          }
+          if (operand == Operand.B) {
+            operandB = value;
+          }
+        });
+        widget.onChanged(calculatorValue);
+      };
+
+  num get calculatorValue {
+    switch (operation) {
+      case Operation.addition:
+        return operandA + operandB;
+      case Operation.subtraction:
+        return operandA - operandB;
+      case Operation.multiplication:
+        return operandA * operandB;
+      case Operation.division:
+        return operandA / operandB;
+      case Operation.sqrt:
+        return sqrt(operandA);
+      default:
+        return 0;
+    }
+  }
+
+  String get calculatorFormat {
+    switch (operation) {
+      case Operation.addition:
+        return '$operandA + $operandB';
+      case Operation.subtraction:
+        return '$operandA - $operandB';
+      case Operation.multiplication:
+        return '$operandA * $operandB';
+      case Operation.division:
+        return '$operandA / $operandB';
+      case Operation.sqrt:
+        return 'sqrt($operandA)';
+      default:
+        return '';
+    }
   }
 
   @override
@@ -90,38 +181,58 @@ class _CalculatorInputState extends State<CalculatorInput> {
               ),
             ],
           ),
-          Operand(label: 'Operand A', initValue: 0),
+          OperandInput(
+              label: 'Operand A',
+              initValue: operandA,
+              memory: widget.memory,
+              onChanged: onOperandChanged(Operand.A)),
           operation == Operation.sqrt
               ? SizedBox(height: 68)
-              : Operand(label: 'Operand B', initValue: 0),
+              : OperandInput(
+                  label: 'Operand B',
+                  initValue: operandB,
+                  memory: widget.memory,
+                  onChanged: onOperandChanged(Operand.B)),
           Container(
               margin: const EdgeInsets.only(top: 10, bottom: 20),
               child: Text(
-                '(1 + 2) = 3',
-              )),
+                  '$calculatorFormat = ${calculatorValue.toStringAsFixed(3)}')),
         ],
       ),
     );
   }
 }
 
-class Operand extends StatefulWidget {
+class OperandInput extends StatefulWidget {
   final String label;
   final num initValue;
+  final num memory;
+  final ValueChanged<String> onChanged;
 
-  const Operand({Key key, this.label, this.initValue}) : super(key: key);
+  const OperandInput(
+      {Key key, this.label, this.initValue, this.memory, this.onChanged})
+      : super(key: key);
 
   @override
-  _OperandState createState() => _OperandState();
+  _OperandInputState createState() => _OperandInputState();
 }
 
-class _OperandState extends State<Operand> {
+class _OperandInputState extends State<OperandInput> {
   TextEditingController controller;
 
   @override
   void initState() {
     super.initState();
     controller = TextEditingController(text: '${widget.initValue}');
+  }
+
+  void onFromMemory() {
+    if (widget.memory == null) return;
+
+    setState(() {
+      controller.text = '${widget.memory}';
+    });
+    widget.onChanged(controller.text);
   }
 
   @override
@@ -141,12 +252,13 @@ class _OperandState extends State<Operand> {
               controller: controller,
               keyboardType: TextInputType.number,
               textAlign: TextAlign.end,
+              onChanged: widget.onChanged,
             ),
           ),
           Padding(
             padding: const EdgeInsets.only(left: 8.0),
             child: RaisedButton(
-                onPressed: () {},
+                onPressed: onFromMemory,
                 child: Text('From memory',
                     style: Theme.of(context).textTheme.button)),
           ),
@@ -157,6 +269,12 @@ class _OperandState extends State<Operand> {
 }
 
 class MemoryManagement extends StatelessWidget {
+  final void Function() onMemorise;
+  final void Function() onResetMemory;
+
+  const MemoryManagement({Key key, this.onMemorise, this.onResetMemory})
+      : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -165,12 +283,12 @@ class MemoryManagement extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             RaisedButton(
-              onPressed: () {},
+              onPressed: onMemorise,
               child: Text('Memorise result',
                   style: Theme.of(context).textTheme.button),
             ),
             RaisedButton(
-              onPressed: () {},
+              onPressed: onResetMemory,
               child: Text('Reset memory',
                   style: Theme.of(context).textTheme.button),
             ),
