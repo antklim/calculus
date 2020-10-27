@@ -1,6 +1,13 @@
 import 'package:flutter/material.dart';
 
-class CalculusScreen extends StatelessWidget {
+class CalculusScreen extends StatefulWidget {
+  @override
+  _CalculusScreenState createState() => _CalculusScreenState();
+}
+
+class _CalculusScreenState extends State<CalculusScreen> {
+  num memory;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -11,7 +18,7 @@ class CalculusScreen extends StatelessWidget {
             children: <Widget>[
               Header(),
               Divider(indent: 10.0, endIndent: 10.0, height: 8.0),
-              MemoryInfo(),
+              MemoryInfo(memory: memory),
               CalculatorInput(),
               MemoryManagement(),
             ],
@@ -36,11 +43,15 @@ class Header extends StatelessWidget {
 }
 
 class MemoryInfo extends StatelessWidget {
+  final num memory;
+
+  const MemoryInfo({Key key, this.memory}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Container(
       alignment: Alignment.center,
-      child: Text('In memory: <Some data in memory>',
+      child: Text('In memory: ${memory ?? ''}',
           style: Theme.of(context).textTheme.bodyText1),
     );
   }
