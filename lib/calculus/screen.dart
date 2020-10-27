@@ -12,6 +12,7 @@ class CalculusScreen extends StatelessWidget {
               Header(),
               Divider(indent: 10.0, endIndent: 10.0, height: 8.0),
               MemoryInfo(),
+              MemoryManagement(),
             ],
           ),
         ),
@@ -40,6 +41,31 @@ class MemoryInfo extends StatelessWidget {
       alignment: Alignment.center,
       child: Text('In memory: <Some data in memory>',
           style: Theme.of(context).textTheme.bodyText1),
+    );
+  }
+}
+
+class MemoryManagement extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: IntrinsicWidth(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            RaisedButton(
+              onPressed: () {},
+              child: Text('Memorise result',
+                  style: Theme.of(context).textTheme.button),
+            ),
+            RaisedButton(
+              onPressed: () {},
+              child: Text('Reset memory',
+                  style: Theme.of(context).textTheme.button),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
