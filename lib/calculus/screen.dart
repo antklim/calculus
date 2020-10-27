@@ -12,6 +12,7 @@ class CalculusScreen extends StatelessWidget {
               Header(),
               Divider(indent: 10.0, endIndent: 10.0, height: 8.0),
               MemoryInfo(),
+              CalculatorInput(),
               MemoryManagement(),
             ],
           ),
@@ -41,6 +42,61 @@ class MemoryInfo extends StatelessWidget {
       alignment: Alignment.center,
       child: Text('In memory: <Some data in memory>',
           style: Theme.of(context).textTheme.bodyText1),
+    );
+  }
+}
+
+enum Operation { addition, subtraction, division, multiplication, sqrt }
+
+class CalculatorInput extends StatefulWidget {
+  @override
+  _CalculatorInputState createState() => _CalculatorInputState();
+}
+
+class _CalculatorInputState extends State<CalculatorInput> {
+  final operations = <Operation, String>{
+    Operation.addition: 'Addition',
+    Operation.subtraction: 'Subtraction',
+    Operation.multiplication: 'Multiplication',
+    Operation.division: 'Division',
+    Operation.sqrt: 'Square root',
+  };
+
+  Operation operation = Operation.addition;
+
+  void onOperationChanged(Operation newOperation) {
+    setState(() {
+      operation = newOperation;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(top: 10),
+      child: Column(
+        children: <Widget>[
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              Text('Operation', style: Theme.of(context).textTheme.bodyText2),
+              DropdownButton(
+                value: operation,
+                items: operations.entries
+                    .map((entry) => DropdownMenuItem(
+                        child: Text(entry.value), value: entry.key))
+                    .toList(),
+                onChanged: onOperationChanged,
+              ),
+            ],
+          ),
+          Container(
+              margin: const EdgeInsets.only(top: 10, bottom: 20),
+              child: Text(
+                '(1 + 2) = 3',
+              )),
+        ],
+      ),
     );
   }
 }
