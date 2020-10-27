@@ -7,6 +7,19 @@ class CalculusScreen extends StatefulWidget {
 
 class _CalculusScreenState extends State<CalculusScreen> {
   num memory;
+  num calculatorResult;
+
+  void onMemorise() {
+    setState(() {
+      memory = calculatorResult;
+    });
+  }
+
+  void onResetMemory() {
+    setState(() {
+      memory = null;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +33,8 @@ class _CalculusScreenState extends State<CalculusScreen> {
               Divider(indent: 10.0, endIndent: 10.0, height: 8.0),
               MemoryInfo(memory: memory),
               CalculatorInput(),
-              MemoryManagement(),
+              MemoryManagement(
+                  onMemorise: onMemorise, onResetMemory: onResetMemory),
             ],
           ),
         ),
@@ -168,6 +182,12 @@ class _OperandState extends State<Operand> {
 }
 
 class MemoryManagement extends StatelessWidget {
+  final void Function() onMemorise;
+  final void Function() onResetMemory;
+
+  const MemoryManagement({Key key, this.onMemorise, this.onResetMemory})
+      : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -176,12 +196,12 @@ class MemoryManagement extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             RaisedButton(
-              onPressed: () {},
+              onPressed: onMemorise,
               child: Text('Memorise result',
                   style: Theme.of(context).textTheme.button),
             ),
             RaisedButton(
-              onPressed: () {},
+              onPressed: onResetMemory,
               child: Text('Reset memory',
                   style: Theme.of(context).textTheme.button),
             ),
