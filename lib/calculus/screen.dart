@@ -9,11 +9,17 @@ class CalculusScreen extends StatefulWidget {
 
 class _CalculusScreenState extends State<CalculusScreen> {
   num memory;
-  num calculatorResult;
+  num calculatorValue;
+
+  void onCalulatorResultChanged(num value) {
+    setState(() {
+      calculatorValue = value;
+    });
+  }
 
   void onMemorise() {
     setState(() {
-      memory = calculatorResult;
+      memory = calculatorValue;
     });
   }
 
@@ -34,7 +40,7 @@ class _CalculusScreenState extends State<CalculusScreen> {
               Header(),
               Divider(indent: 10.0, endIndent: 10.0, height: 8.0),
               MemoryInfo(memory: memory),
-              CalculatorInput(),
+              CalculatorInput(onChanged: onCalulatorResultChanged),
               MemoryManagement(
                   onMemorise: onMemorise, onResetMemory: onResetMemory),
             ],
@@ -77,6 +83,10 @@ enum Operation { addition, subtraction, division, multiplication, sqrt }
 enum Operand { A, B }
 
 class CalculatorInput extends StatefulWidget {
+  final ValueChanged<num> onChanged;
+
+  const CalculatorInput({Key key, this.onChanged}) : super(key: key);
+
   @override
   _CalculatorInputState createState() => _CalculatorInputState();
 }
@@ -98,6 +108,7 @@ class _CalculatorInputState extends State<CalculatorInput> {
     setState(() {
       operation = newOperation;
     });
+    widget.onChanged(calculatorValue);
   }
 
   ValueChanged<String> onOperandChanged(Operand operand) => (String v) {
@@ -110,9 +121,10 @@ class _CalculatorInputState extends State<CalculatorInput> {
             operandB = value;
           }
         });
+        widget.onChanged(calculatorValue);
       };
 
-  num get value {
+  num get calculatorValue {
     switch (operation) {
       case Operation.addition:
         return operandA + operandB;
@@ -129,7 +141,7 @@ class _CalculatorInputState extends State<CalculatorInput> {
     }
   }
 
-  String get format {
+  String get calculatorFormat {
     switch (operation) {
       case Operation.addition:
         return '$operandA + $operandB';
@@ -178,7 +190,8 @@ class _CalculatorInputState extends State<CalculatorInput> {
                   onChanged: onOperandChanged(Operand.B)),
           Container(
               margin: const EdgeInsets.only(top: 10, bottom: 20),
-              child: Text('$format = ${value.toStringAsFixed(3)}')),
+              child: Text(
+                  '$calculatorFormat = ${calculatorValue.toStringAsFixed(3)}')),
         ],
       ),
     );
