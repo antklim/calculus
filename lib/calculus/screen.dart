@@ -40,7 +40,8 @@ class _CalculusScreenState extends State<CalculusScreen> {
               Header(),
               Divider(indent: 10.0, endIndent: 10.0, height: 8.0),
               MemoryInfo(memory: memory),
-              CalculatorInput(onChanged: onCalulatorResultChanged),
+              CalculatorInput(
+                  memory: memory, onChanged: onCalulatorResultChanged),
               MemoryManagement(
                   onMemorise: onMemorise, onResetMemory: onResetMemory),
             ],
@@ -83,9 +84,11 @@ enum Operation { addition, subtraction, division, multiplication, sqrt }
 enum Operand { A, B }
 
 class CalculatorInput extends StatefulWidget {
+  final num memory;
   final ValueChanged<num> onChanged;
 
-  const CalculatorInput({Key key, this.onChanged}) : super(key: key);
+  const CalculatorInput({Key key, this.memory, this.onChanged})
+      : super(key: key);
 
   @override
   _CalculatorInputState createState() => _CalculatorInputState();
@@ -181,12 +184,14 @@ class _CalculatorInputState extends State<CalculatorInput> {
           OperandInput(
               label: 'Operand A',
               initValue: operandA,
+              memory: widget.memory,
               onChanged: onOperandChanged(Operand.A)),
           operation == Operation.sqrt
               ? SizedBox(height: 68)
               : OperandInput(
                   label: 'Operand B',
                   initValue: operandB,
+                  memory: widget.memory,
                   onChanged: onOperandChanged(Operand.B)),
           Container(
               margin: const EdgeInsets.only(top: 10, bottom: 20),
@@ -201,9 +206,11 @@ class _CalculatorInputState extends State<CalculatorInput> {
 class OperandInput extends StatefulWidget {
   final String label;
   final num initValue;
+  final num memory;
   final ValueChanged<String> onChanged;
 
-  const OperandInput({Key key, this.label, this.initValue, this.onChanged})
+  const OperandInput(
+      {Key key, this.label, this.initValue, this.memory, this.onChanged})
       : super(key: key);
 
   @override
@@ -217,6 +224,15 @@ class _OperandInputState extends State<OperandInput> {
   void initState() {
     super.initState();
     controller = TextEditingController(text: '${widget.initValue}');
+  }
+
+  void onFromMemory() {
+    if (widget.memory == null) return;
+
+    setState(() {
+      controller.text = '${widget.memory}';
+    });
+    widget.onChanged(controller.text);
   }
 
   @override
@@ -242,7 +258,7 @@ class _OperandInputState extends State<OperandInput> {
           Padding(
             padding: const EdgeInsets.only(left: 8.0),
             child: RaisedButton(
-                onPressed: () {},
+                onPressed: onFromMemory,
                 child: Text('From memory',
                     style: Theme.of(context).textTheme.button)),
           ),
