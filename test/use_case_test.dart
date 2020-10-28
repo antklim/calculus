@@ -35,17 +35,39 @@ void main() {
     });
 
     test('sets operation', () {
-      CalculatorUseCase useCase =
-          CalculatorUseCase(operation: Add, operandA: 1, operandB: 2);
+      bool memoryChanged = false;
+      void onMemoryChanged() => memoryChanged = true;
+
+      bool operationChanged = false;
+      void onOperationChanged() => operationChanged = true;
+
+      CalculatorUseCase useCase = CalculatorUseCase(
+          operation: Add,
+          operandA: 1,
+          operandB: 2,
+          onMemoryChanged: onMemoryChanged,
+          onOperationChanged: onOperationChanged);
 
       expect(useCase.value, 3);
       useCase.setOperation(Sub);
       expect(useCase.value, -1);
+      expect(memoryChanged, false);
+      expect(operationChanged, true);
     });
 
     test('sets operands', () {
-      CalculatorUseCase useCase =
-          CalculatorUseCase(operation: Add, operandA: 1, operandB: 2);
+      bool memoryChanged = false;
+      void onMemoryChanged() => memoryChanged = true;
+
+      bool operationChanged = false;
+      void onOperationChanged() => operationChanged = true;
+
+      CalculatorUseCase useCase = CalculatorUseCase(
+          operation: Add,
+          operandA: 1,
+          operandB: 2,
+          onMemoryChanged: onMemoryChanged,
+          onOperationChanged: onOperationChanged);
 
       expect(useCase.operandA, 1);
       expect(useCase.operandB, 2);
@@ -57,11 +79,24 @@ void main() {
       useCase.setOperand(Operand.B)(6);
       expect(useCase.operandA, 4);
       expect(useCase.operandB, 6);
+
+      expect(memoryChanged, false);
+      expect(operationChanged, true);
     });
 
     test('sets operands from memory', () {
-      CalculatorUseCase useCase =
-          CalculatorUseCase(operation: Add, operandA: 1, operandB: 2);
+      bool memoryChanged = false;
+      void onMemoryChanged() => memoryChanged = true;
+
+      bool operationChanged = false;
+      void onOperationChanged() => operationChanged = true;
+
+      CalculatorUseCase useCase = CalculatorUseCase(
+          operation: Add,
+          operandA: 1,
+          operandB: 2,
+          onMemoryChanged: onMemoryChanged,
+          onOperationChanged: onOperationChanged);
 
       expect(useCase.operandA, 1);
       expect(useCase.operandB, 2);
@@ -69,6 +104,9 @@ void main() {
       useCase.fromMemory(Operand.A);
       expect(useCase.operandA, 1);
       expect(useCase.operandB, 2);
+
+      expect(memoryChanged, false);
+      expect(operationChanged, false);
 
       useCase.memorise();
       useCase.fromMemory(Operand.A);
@@ -78,15 +116,32 @@ void main() {
       useCase.fromMemory(Operand.B);
       expect(useCase.operandA, 3);
       expect(useCase.operandB, 3);
+
+      expect(memoryChanged, true);
+      expect(operationChanged, true);
     });
 
     test('manages memory', () {
-      CalculatorUseCase useCase =
-          CalculatorUseCase(operation: Add, operandA: 1, operandB: 2);
+      bool memoryChanged = false;
+      void onMemoryChanged() => memoryChanged = true;
+
+      bool operationChanged = false;
+      void onOperationChanged() => operationChanged = true;
+
+      CalculatorUseCase useCase = CalculatorUseCase(
+          operation: Add,
+          operandA: 1,
+          operandB: 2,
+          onMemoryChanged: onMemoryChanged,
+          onOperationChanged: onOperationChanged);
 
       expect(useCase.memory, null);
       useCase.memorise();
       expect(useCase.memory, 3);
+
+      expect(memoryChanged, true);
+      expect(operationChanged, false);
+
       useCase.resetMemory();
       expect(useCase.memory, null);
     });
