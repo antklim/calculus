@@ -62,17 +62,12 @@ class MemoryInfo extends StatelessWidget {
   }
 }
 
-class CalculatorInput extends StatefulWidget {
-  @override
-  _CalculatorInputState createState() => _CalculatorInputState();
-}
-
-class _CalculatorInputState extends State<CalculatorInput> {
-  final operations = <Operation>[Add, Sub, Mul, Div, Sqrt];
-
+class CalculatorInput extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     CalculatorState state = Provider.of<CalculatorState>(context);
+
+    final operations = <Operation>[Add, Sub, Mul, Div, Sqrt];
 
     return Container(
       margin: const EdgeInsets.only(top: 10),
@@ -132,10 +127,12 @@ class _OperandInputState extends State<OperandInput> {
     final CalculatorState _state =
         Provider.of<CalculatorState>(context, listen: false);
 
-    setState(() {
-      controller.text = '${_state.memory}';
-    });
     _state.fromMemory(widget.operand);
+    if (_state.memory != null) {
+      setState(() {
+        controller.text = '${_state.memory}';
+      });
+    }
   }
 
   @override
