@@ -74,6 +74,14 @@ class CalculatorUseCase {
       (operand == Operand.A) ? _setOperandA : _setOperandB;
 
   ///
+  /// User sets operand value from memory.
+  ///
+  void fromMemory(Operand operand) {
+    if (memory == null) return;
+    setOperand(operand)(memory);
+  }
+
+  ///
   /// User saves operation result to memory
   ///
   void memorise() {

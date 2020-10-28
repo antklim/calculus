@@ -91,17 +91,14 @@ class _CalculatorInputState extends State<CalculatorInput> {
   };
 
   void onOperationChanged(Operation newOperation) {
-    setState(() {
-      widget.useCase.setOperation(newOperation);
-    });
+    widget.useCase.setOperation(newOperation);
+    setState(() {});
   }
 
-  ValueChanged<String> onOperandChanged(Operand operand) => (String v) {
-        double value = double.tryParse(v) ?? 0;
-        setState(() {
-          widget.useCase.setOperand(operand)(value);
-        });
-      };
+  void onOperandChanged() {
+    // rebuilding calculation result widget
+    setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -125,16 +122,16 @@ class _CalculatorInputState extends State<CalculatorInput> {
           ),
           OperandInput(
               label: 'Operand A',
-              initValue: widget.useCase.operandValue(Operand.A),
-              memory: widget.useCase.memory,
-              onChanged: onOperandChanged(Operand.A)),
+              operand: Operand.A,
+              useCase: widget.useCase,
+              onChanged: onOperandChanged),
           widget.useCase.operation == Operation.sqrt
               ? SizedBox(height: 68)
               : OperandInput(
                   label: 'Operand B',
-                  initValue: widget.useCase.operandValue(Operand.B),
-                  memory: widget.useCase.memory,
-                  onChanged: onOperandChanged(Operand.B)),
+                  operand: Operand.B,
+                  useCase: widget.useCase,
+                  onChanged: onOperandChanged),
           Container(
               margin: const EdgeInsets.only(top: 10, bottom: 20),
               child: Text(
@@ -147,12 +144,12 @@ class _CalculatorInputState extends State<CalculatorInput> {
 
 class OperandInput extends StatefulWidget {
   final String label;
-  final num initValue;
-  final num memory;
-  final ValueChanged<String> onChanged;
+  final Operand operand;
+  final CalculatorUseCase useCase;
+  final Function onChanged;
 
   const OperandInput(
-      {Key key, this.label, this.initValue, this.memory, this.onChanged})
+      {Key key, this.label, this.operand, this.useCase, this.onChanged})
       : super(key: key);
 
   @override
@@ -165,16 +162,24 @@ class _OperandInputState extends State<OperandInput> {
   @override
   void initState() {
     super.initState();
-    controller = TextEditingController(text: '${widget.initValue}');
+    controller = TextEditingController(
+        text: '${widget.useCase.operandValue(widget.operand)}');
   }
 
   void onFromMemory() {
-    if (widget.memory == null) return;
+    if (widget.useCase.memory == null) return;
 
     setState(() {
-      controller.text = '${widget.memory}';
+      controller.text = '${widget.useCase.memory}';
     });
-    widget.onChanged(controller.text);
+    widget.useCase.fromMemory(widget.operand);
+    widget.onChanged();
+  }
+
+  void onChanged(String v) {
+    double value = double.tryParse(v) ?? 0;
+    widget.useCase.setOperand(widget.operand)(value);
+    widget.onChanged();
   }
 
   @override
@@ -194,7 +199,7 @@ class _OperandInputState extends State<OperandInput> {
               controller: controller,
               keyboardType: TextInputType.number,
               textAlign: TextAlign.end,
-              onChanged: widget.onChanged,
+              onChanged: onChanged,
             ),
           ),
           Padding(
