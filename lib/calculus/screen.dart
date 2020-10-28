@@ -125,15 +125,15 @@ class _CalculatorInputState extends State<CalculatorInput> {
           ),
           OperandInput(
               label: 'Operand A',
-              operand: Operand.A,
-              useCase: widget.useCase,
+              initValue: widget.useCase.operandValue(Operand.A),
+              memory: widget.useCase.memory,
               onChanged: onOperandChanged(Operand.A)),
           widget.useCase.operation == Operation.sqrt
               ? SizedBox(height: 68)
               : OperandInput(
                   label: 'Operand B',
-                  operand: Operand.B,
-                  useCase: widget.useCase,
+                  initValue: widget.useCase.operandValue(Operand.B),
+                  memory: widget.useCase.memory,
                   onChanged: onOperandChanged(Operand.B)),
           Container(
               margin: const EdgeInsets.only(top: 10, bottom: 20),
@@ -147,12 +147,12 @@ class _CalculatorInputState extends State<CalculatorInput> {
 
 class OperandInput extends StatefulWidget {
   final String label;
-  final Operand operand;
-  final CalculatorUseCase useCase;
+  final num initValue;
+  final num memory;
   final ValueChanged<String> onChanged;
 
   const OperandInput(
-      {Key key, this.label, this.operand, this.useCase, this.onChanged})
+      {Key key, this.label, this.initValue, this.memory, this.onChanged})
       : super(key: key);
 
   @override
@@ -165,15 +165,14 @@ class _OperandInputState extends State<OperandInput> {
   @override
   void initState() {
     super.initState();
-    controller = TextEditingController(
-        text: '${widget.useCase.operandValue(widget.operand)}');
+    controller = TextEditingController(text: '${widget.initValue}');
   }
 
   void onFromMemory() {
-    if (widget.useCase.memory == null) return;
+    if (widget.memory == null) return;
 
     setState(() {
-      controller.text = '${widget.useCase.memory}';
+      controller.text = '${widget.memory}';
     });
     widget.onChanged(controller.text);
   }
