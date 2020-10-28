@@ -12,8 +12,8 @@ class CalculatorState extends ChangeNotifier {
         onOperationChanged: onOperationChanged);
   }
 
-  void onMemoryChanged() {}
-  void onOperationChanged() {}
+  void onMemoryChanged() => notifyListeners();
+  void onOperationChanged() => notifyListeners();
 
   void setOperation(Operation operation) => _useCase.setOperation(operation);
 
