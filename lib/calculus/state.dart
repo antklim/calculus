@@ -27,4 +27,10 @@ class CalculatorState extends ChangeNotifier {
   void memorise() => _useCase.memorise();
 
   void resetMemory() => _useCase.resetMemory();
+
+  num get memory => _useCase.memory;
+  Operation get operation => _useCase.operation;
+  num get value => _useCase.value;
+  String get format => _useCase.format;
+  num operandValue(Operand operand) => _useCase.operandValue(operand);
 }
