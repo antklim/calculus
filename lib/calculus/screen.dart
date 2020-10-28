@@ -1,28 +1,20 @@
+import 'package:calculus/calculus/state.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import 'operation.dart';
 import 'use_case.dart';
 
-class CalculusScreen extends StatefulWidget {
+class CalculusScreen extends StatelessWidget {
   @override
-  _CalculusScreenState createState() => _CalculusScreenState();
+  Widget build(BuildContext context) {
+    return ChangeNotifierProvider<CalculatorState>(
+        create: (_) => CalculatorState(),
+        builder: (context, _) => CalculusScreenContainer());
+  }
 }
 
-class _CalculusScreenState extends State<CalculusScreen> {
-  CalculatorUseCase useCase = CalculatorUseCase();
-
-  void onMemorise() {
-    setState(() {
-      useCase.memorise();
-    });
-  }
-
-  void onResetMemory() {
-    setState(() {
-      useCase.resetMemory();
-    });
-  }
-
+class CalculusScreenContainer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -33,10 +25,9 @@ class _CalculusScreenState extends State<CalculusScreen> {
             children: <Widget>[
               Header(),
               Divider(indent: 10.0, endIndent: 10.0, height: 8.0),
-              MemoryInfo(memory: useCase.memory),
-              CalculatorInput(useCase: useCase),
-              MemoryManagement(
-                  onMemorise: onMemorise, onResetMemory: onResetMemory),
+              MemoryInfo(),
+              CalculatorInput(),
+              MemoryManagement(),
             ],
           ),
         ),
@@ -59,44 +50,25 @@ class Header extends StatelessWidget {
 }
 
 class MemoryInfo extends StatelessWidget {
-  final num memory;
-
-  const MemoryInfo({Key key, this.memory}) : super(key: key);
-
   @override
   Widget build(BuildContext context) {
+    CalculatorState state = Provider.of<CalculatorState>(context);
+
     return Container(
       alignment: Alignment.center,
-      child: Text('In memory: ${memory ?? ''}',
+      child: Text('In memory: ${state.memory ?? ''}',
           style: Theme.of(context).textTheme.bodyText1),
     );
   }
 }
 
-class CalculatorInput extends StatefulWidget {
-  final CalculatorUseCase useCase;
-
-  const CalculatorInput({Key key, this.useCase}) : super(key: key);
-
-  @override
-  _CalculatorInputState createState() => _CalculatorInputState();
-}
-
-class _CalculatorInputState extends State<CalculatorInput> {
-  final operations = <Operation>[Add, Sub, Mul, Div, Sqrt];
-
-  void onOperationChanged(Operation newOperation) {
-    widget.useCase.setOperation(newOperation);
-    setState(() {});
-  }
-
-  void onOperandChanged() {
-    // rebuilding calculation result widget
-    setState(() {});
-  }
-
+class CalculatorInput extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    CalculatorState state = Provider.of<CalculatorState>(context);
+
+    final operations = <Operation>[Add, Sub, Mul, Div, Sqrt];
+
     return Container(
       margin: const EdgeInsets.only(top: 10),
       child: Column(
@@ -106,31 +78,23 @@ class _CalculatorInputState extends State<CalculatorInput> {
             children: <Widget>[
               Text('Operation', style: Theme.of(context).textTheme.bodyText2),
               DropdownButton(
-                value: widget.useCase.operation,
+                value: state.operation,
                 items: operations
                     .map((entry) =>
                         DropdownMenuItem(child: Text(entry.name), value: entry))
                     .toList(),
-                onChanged: onOperationChanged,
+                onChanged: state.setOperation,
               ),
             ],
           ),
-          OperandInput(
-              label: 'Operand A',
-              operand: Operand.A,
-              useCase: widget.useCase,
-              onChanged: onOperandChanged),
-          widget.useCase.operation == Sqrt
+          OperandInput(label: 'Operand A', operand: Operand.A),
+          state.operation == Sqrt
               ? SizedBox(height: 68)
-              : OperandInput(
-                  label: 'Operand B',
-                  operand: Operand.B,
-                  useCase: widget.useCase,
-                  onChanged: onOperandChanged),
+              : OperandInput(label: 'Operand B', operand: Operand.B),
           Container(
               margin: const EdgeInsets.only(top: 10, bottom: 20),
-              child: Text(
-                  '${widget.useCase.format} = ${widget.useCase.value.toStringAsFixed(3)}')),
+              child:
+                  Text('${state.format} = ${state.value.toStringAsFixed(3)}')),
         ],
       ),
     );
@@ -140,12 +104,8 @@ class _CalculatorInputState extends State<CalculatorInput> {
 class OperandInput extends StatefulWidget {
   final String label;
   final Operand operand;
-  final CalculatorUseCase useCase;
-  final Function onChanged;
 
-  const OperandInput(
-      {Key key, this.label, this.operand, this.useCase, this.onChanged})
-      : super(key: key);
+  const OperandInput({Key key, this.label, this.operand}) : super(key: key);
 
   @override
   _OperandInputState createState() => _OperandInputState();
@@ -157,28 +117,28 @@ class _OperandInputState extends State<OperandInput> {
   @override
   void initState() {
     super.initState();
-    controller = TextEditingController(
-        text: '${widget.useCase.operandValue(widget.operand)}');
+    final CalculatorState _state =
+        Provider.of<CalculatorState>(context, listen: false);
+    controller =
+        TextEditingController(text: '${_state.operandValue(widget.operand)}');
   }
 
   void onFromMemory() {
-    if (widget.useCase.memory == null) return;
+    final CalculatorState _state =
+        Provider.of<CalculatorState>(context, listen: false);
 
-    setState(() {
-      controller.text = '${widget.useCase.memory}';
-    });
-    widget.useCase.fromMemory(widget.operand);
-    widget.onChanged();
-  }
-
-  void onChanged(String v) {
-    double value = double.tryParse(v) ?? 0;
-    widget.useCase.setOperand(widget.operand)(value);
-    widget.onChanged();
+    _state.fromMemory(widget.operand);
+    if (_state.memory != null) {
+      setState(() {
+        controller.text = '${_state.memory}';
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    CalculatorState state = Provider.of<CalculatorState>(context);
+
     return Container(
       margin: const EdgeInsets.only(top: 10, bottom: 10),
       child: Row(
@@ -194,7 +154,7 @@ class _OperandInputState extends State<OperandInput> {
               controller: controller,
               keyboardType: TextInputType.number,
               textAlign: TextAlign.end,
-              onChanged: onChanged,
+              onChanged: state.setOperand(widget.operand),
             ),
           ),
           Padding(
@@ -211,26 +171,22 @@ class _OperandInputState extends State<OperandInput> {
 }
 
 class MemoryManagement extends StatelessWidget {
-  final void Function() onMemorise;
-  final void Function() onResetMemory;
-
-  const MemoryManagement({Key key, this.onMemorise, this.onResetMemory})
-      : super(key: key);
-
   @override
   Widget build(BuildContext context) {
+    CalculatorState state = Provider.of<CalculatorState>(context);
+
     return Center(
       child: IntrinsicWidth(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             RaisedButton(
-              onPressed: onMemorise,
+              onPressed: state.memorise,
               child: Text('Memorise result',
                   style: Theme.of(context).textTheme.button),
             ),
             RaisedButton(
-              onPressed: onResetMemory,
+              onPressed: state.resetMemory,
               child: Text('Reset memory',
                   style: Theme.of(context).textTheme.button),
             ),

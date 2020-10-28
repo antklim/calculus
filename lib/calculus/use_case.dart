@@ -1,7 +1,5 @@
 import 'operation.dart';
 
-typedef ValueChanged<T> = void Function(T value);
-
 enum Operand { A, B }
 
 class CalculatorUseCase {
@@ -9,9 +7,15 @@ class CalculatorUseCase {
   Operation operation;
   num operandA;
   num operandB;
+  void Function() onMemoryChanged;
+  void Function() onOperationChanged;
 
   CalculatorUseCase(
-      {Operation operation, this.operandA = 0, this.operandB = 0}) {
+      {Operation operation,
+      this.operandA = 0,
+      this.operandB = 0,
+      this.onMemoryChanged,
+      this.onOperationChanged}) {
     this.operation = operation ?? Add;
   }
 
@@ -27,6 +31,7 @@ class CalculatorUseCase {
   ///
   void setOperation(Operation value) {
     operation = value;
+    onOperationChanged?.call();
   }
 
   num operandValue(Operand operand) =>
@@ -38,8 +43,10 @@ class CalculatorUseCase {
   ///
   /// User sets new operand value.
   ///
-  ValueChanged<num> setOperand(Operand operand) =>
-      (operand == Operand.A) ? _setOperandA : _setOperandB;
+  void Function(num) setOperand(Operand operand) {
+    onOperationChanged?.call();
+    return (operand == Operand.A) ? _setOperandA : _setOperandB;
+  }
 
   ///
   /// User sets operand value from memory.
@@ -54,6 +61,7 @@ class CalculatorUseCase {
   ///
   void memorise() {
     memory = value;
+    onMemoryChanged?.call();
   }
 
   ///
@@ -61,5 +69,6 @@ class CalculatorUseCase {
   ///
   void resetMemory() {
     memory = null;
+    onMemoryChanged?.call();
   }
 }
