@@ -1,6 +1,7 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
+
+import 'operation.dart';
+import 'use_case.dart';
 
 class CalculusScreen extends StatefulWidget {
   @override
@@ -8,24 +9,17 @@ class CalculusScreen extends StatefulWidget {
 }
 
 class _CalculusScreenState extends State<CalculusScreen> {
-  num memory;
-  num calculatorValue;
-
-  void onCalulatorResultChanged(num value) {
-    setState(() {
-      calculatorValue = value;
-    });
-  }
+  CalculatorUseCase useCase = CalculatorUseCase();
 
   void onMemorise() {
     setState(() {
-      memory = calculatorValue;
+      useCase.memorise();
     });
   }
 
   void onResetMemory() {
     setState(() {
-      memory = null;
+      useCase.resetMemory();
     });
   }
 
@@ -39,9 +33,8 @@ class _CalculusScreenState extends State<CalculusScreen> {
             children: <Widget>[
               Header(),
               Divider(indent: 10.0, endIndent: 10.0, height: 8.0),
-              MemoryInfo(memory: memory),
-              CalculatorInput(
-                  memory: memory, onChanged: onCalulatorResultChanged),
+              MemoryInfo(memory: useCase.memory),
+              CalculatorInput(useCase: useCase),
               MemoryManagement(
                   onMemorise: onMemorise, onResetMemory: onResetMemory),
             ],
@@ -80,85 +73,26 @@ class MemoryInfo extends StatelessWidget {
   }
 }
 
-enum Operation { addition, subtraction, division, multiplication, sqrt }
-enum Operand { A, B }
-
 class CalculatorInput extends StatefulWidget {
-  final num memory;
-  final ValueChanged<num> onChanged;
+  final CalculatorUseCase useCase;
 
-  const CalculatorInput({Key key, this.memory, this.onChanged})
-      : super(key: key);
+  const CalculatorInput({Key key, this.useCase}) : super(key: key);
 
   @override
   _CalculatorInputState createState() => _CalculatorInputState();
 }
 
 class _CalculatorInputState extends State<CalculatorInput> {
-  final operations = <Operation, String>{
-    Operation.addition: 'Addition',
-    Operation.subtraction: 'Subtraction',
-    Operation.multiplication: 'Multiplication',
-    Operation.division: 'Division',
-    Operation.sqrt: 'Square root',
-  };
-
-  Operation operation = Operation.addition;
-  num operandA = 0;
-  num operandB = 0;
+  final operations = <Operation>[Add, Sub, Mul, Div, Sqrt];
 
   void onOperationChanged(Operation newOperation) {
-    setState(() {
-      operation = newOperation;
-    });
-    widget.onChanged(calculatorValue);
+    widget.useCase.setOperation(newOperation);
+    setState(() {});
   }
 
-  ValueChanged<String> onOperandChanged(Operand operand) => (String v) {
-        double value = double.tryParse(v) ?? 0;
-        setState(() {
-          if (operand == Operand.A) {
-            operandA = value;
-          }
-          if (operand == Operand.B) {
-            operandB = value;
-          }
-        });
-        widget.onChanged(calculatorValue);
-      };
-
-  num get calculatorValue {
-    switch (operation) {
-      case Operation.addition:
-        return operandA + operandB;
-      case Operation.subtraction:
-        return operandA - operandB;
-      case Operation.multiplication:
-        return operandA * operandB;
-      case Operation.division:
-        return operandA / operandB;
-      case Operation.sqrt:
-        return sqrt(operandA);
-      default:
-        return 0;
-    }
-  }
-
-  String get calculatorFormat {
-    switch (operation) {
-      case Operation.addition:
-        return '$operandA + $operandB';
-      case Operation.subtraction:
-        return '$operandA - $operandB';
-      case Operation.multiplication:
-        return '$operandA * $operandB';
-      case Operation.division:
-        return '$operandA / $operandB';
-      case Operation.sqrt:
-        return 'sqrt($operandA)';
-      default:
-        return '';
-    }
+  void onOperandChanged() {
+    // rebuilding calculation result widget
+    setState(() {});
   }
 
   @override
@@ -172,10 +106,10 @@ class _CalculatorInputState extends State<CalculatorInput> {
             children: <Widget>[
               Text('Operation', style: Theme.of(context).textTheme.bodyText2),
               DropdownButton(
-                value: operation,
-                items: operations.entries
-                    .map((entry) => DropdownMenuItem(
-                        child: Text(entry.value), value: entry.key))
+                value: widget.useCase.operation,
+                items: operations
+                    .map((entry) =>
+                        DropdownMenuItem(child: Text(entry.name), value: entry))
                     .toList(),
                 onChanged: onOperationChanged,
               ),
@@ -183,20 +117,20 @@ class _CalculatorInputState extends State<CalculatorInput> {
           ),
           OperandInput(
               label: 'Operand A',
-              initValue: operandA,
-              memory: widget.memory,
-              onChanged: onOperandChanged(Operand.A)),
-          operation == Operation.sqrt
+              operand: Operand.A,
+              useCase: widget.useCase,
+              onChanged: onOperandChanged),
+          widget.useCase.operation == Sqrt
               ? SizedBox(height: 68)
               : OperandInput(
                   label: 'Operand B',
-                  initValue: operandB,
-                  memory: widget.memory,
-                  onChanged: onOperandChanged(Operand.B)),
+                  operand: Operand.B,
+                  useCase: widget.useCase,
+                  onChanged: onOperandChanged),
           Container(
               margin: const EdgeInsets.only(top: 10, bottom: 20),
               child: Text(
-                  '$calculatorFormat = ${calculatorValue.toStringAsFixed(3)}')),
+                  '${widget.useCase.format} = ${widget.useCase.value.toStringAsFixed(3)}')),
         ],
       ),
     );
@@ -205,12 +139,12 @@ class _CalculatorInputState extends State<CalculatorInput> {
 
 class OperandInput extends StatefulWidget {
   final String label;
-  final num initValue;
-  final num memory;
-  final ValueChanged<String> onChanged;
+  final Operand operand;
+  final CalculatorUseCase useCase;
+  final Function onChanged;
 
   const OperandInput(
-      {Key key, this.label, this.initValue, this.memory, this.onChanged})
+      {Key key, this.label, this.operand, this.useCase, this.onChanged})
       : super(key: key);
 
   @override
@@ -223,16 +157,24 @@ class _OperandInputState extends State<OperandInput> {
   @override
   void initState() {
     super.initState();
-    controller = TextEditingController(text: '${widget.initValue}');
+    controller = TextEditingController(
+        text: '${widget.useCase.operandValue(widget.operand)}');
   }
 
   void onFromMemory() {
-    if (widget.memory == null) return;
+    if (widget.useCase.memory == null) return;
 
     setState(() {
-      controller.text = '${widget.memory}';
+      controller.text = '${widget.useCase.memory}';
     });
-    widget.onChanged(controller.text);
+    widget.useCase.fromMemory(widget.operand);
+    widget.onChanged();
+  }
+
+  void onChanged(String v) {
+    double value = double.tryParse(v) ?? 0;
+    widget.useCase.setOperand(widget.operand)(value);
+    widget.onChanged();
   }
 
   @override
@@ -252,7 +194,7 @@ class _OperandInputState extends State<OperandInput> {
               controller: controller,
               keyboardType: TextInputType.number,
               textAlign: TextAlign.end,
-              onChanged: widget.onChanged,
+              onChanged: onChanged,
             ),
           ),
           Padding(
