@@ -13,6 +13,10 @@ class CalculatorUseCase {
       this.operandA = 0,
       this.operandB = 0});
 
+  @override
+  String toString() =>
+      'operation: $operation, A: $operandA, B: $operandB, value: $value';
+
   num get value {
     switch (operation) {
       case Operation.addition:

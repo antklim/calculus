@@ -8,24 +8,17 @@ class CalculusScreen extends StatefulWidget {
 }
 
 class _CalculusScreenState extends State<CalculusScreen> {
-  num memory;
-  num calculatorValue;
-
-  void onCalulatorResultChanged(num value) {
-    setState(() {
-      calculatorValue = value;
-    });
-  }
+  CalculatorUseCase useCase = CalculatorUseCase();
 
   void onMemorise() {
     setState(() {
-      memory = calculatorValue;
+      useCase.memorise();
     });
   }
 
   void onResetMemory() {
     setState(() {
-      memory = null;
+      useCase.resetMemory();
     });
   }
 
@@ -39,9 +32,8 @@ class _CalculusScreenState extends State<CalculusScreen> {
             children: <Widget>[
               Header(),
               Divider(indent: 10.0, endIndent: 10.0, height: 8.0),
-              MemoryInfo(memory: memory),
-              CalculatorInput(
-                  memory: memory, onChanged: onCalulatorResultChanged),
+              MemoryInfo(memory: useCase.memory),
+              CalculatorInput(useCase: useCase),
               MemoryManagement(
                   onMemorise: onMemorise, onResetMemory: onResetMemory),
             ],
@@ -83,11 +75,9 @@ class MemoryInfo extends StatelessWidget {
 enum Operand { A, B }
 
 class CalculatorInput extends StatefulWidget {
-  final num memory;
-  final ValueChanged<num> onChanged;
+  final CalculatorUseCase useCase;
 
-  const CalculatorInput({Key key, this.memory, this.onChanged})
-      : super(key: key);
+  const CalculatorInput({Key key, this.useCase}) : super(key: key);
 
   @override
   _CalculatorInputState createState() => _CalculatorInputState();
@@ -102,26 +92,22 @@ class _CalculatorInputState extends State<CalculatorInput> {
     Operation.sqrt: 'Square root',
   };
 
-  CalculatorUseCase useCase = CalculatorUseCase();
-
   void onOperationChanged(Operation newOperation) {
     setState(() {
-      useCase.setOperation(newOperation);
+      widget.useCase.setOperation(newOperation);
     });
-    widget.onChanged(useCase.value);
   }
 
   ValueChanged<String> onOperandChanged(Operand operand) => (String v) {
         double value = double.tryParse(v) ?? 0;
         setState(() {
           if (operand == Operand.A) {
-            useCase.operandA = value;
+            widget.useCase.operandA = value;
           }
           if (operand == Operand.B) {
-            useCase.operandB = value;
+            widget.useCase.operandB = value;
           }
         });
-        widget.onChanged(useCase.value);
       };
 
   @override
@@ -135,7 +121,7 @@ class _CalculatorInputState extends State<CalculatorInput> {
             children: <Widget>[
               Text('Operation', style: Theme.of(context).textTheme.bodyText2),
               DropdownButton(
-                value: useCase.operation,
+                value: widget.useCase.operation,
                 items: operations.entries
                     .map((entry) => DropdownMenuItem(
                         child: Text(entry.value), value: entry.key))
@@ -146,20 +132,20 @@ class _CalculatorInputState extends State<CalculatorInput> {
           ),
           OperandInput(
               label: 'Operand A',
-              initValue: useCase.operandA,
-              memory: widget.memory,
+              initValue: widget.useCase.operandA,
+              memory: widget.useCase.memory,
               onChanged: onOperandChanged(Operand.A)),
-          useCase.operation == Operation.sqrt
+          widget.useCase.operation == Operation.sqrt
               ? SizedBox(height: 68)
               : OperandInput(
                   label: 'Operand B',
-                  initValue: useCase.operandB,
-                  memory: widget.memory,
+                  initValue: widget.useCase.operandB,
+                  memory: widget.useCase.memory,
                   onChanged: onOperandChanged(Operand.B)),
           Container(
               margin: const EdgeInsets.only(top: 10, bottom: 20),
               child: Text(
-                  '${useCase.format} = ${useCase.value.toStringAsFixed(3)}')),
+                  '${widget.useCase.format} = ${widget.useCase.value.toStringAsFixed(3)}')),
         ],
       ),
     );
