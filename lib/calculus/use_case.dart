@@ -1,8 +1,7 @@
-import 'dart:math';
+import 'operation.dart';
 
-import 'package:flutter/material.dart';
+typedef ValueChanged<T> = void Function(T value);
 
-enum Operation { addition, subtraction, division, multiplication, sqrt }
 enum Operand { A, B }
 
 class CalculatorUseCase {
@@ -12,47 +11,16 @@ class CalculatorUseCase {
   num operandB;
 
   CalculatorUseCase(
-      {this.operation = Operation.addition,
-      this.operandA = 0,
-      this.operandB = 0});
+      {Operation operation, this.operandA = 0, this.operandB = 0}) {
+    this.operation = operation ?? Add;
+  }
 
   @override
   String toString() =>
       'operation: $operation, A: $operandA, B: $operandB, value: $value';
 
-  num get value {
-    switch (operation) {
-      case Operation.addition:
-        return operandA + operandB;
-      case Operation.subtraction:
-        return operandA - operandB;
-      case Operation.multiplication:
-        return operandA * operandB;
-      case Operation.division:
-        return operandA / operandB;
-      case Operation.sqrt:
-        return sqrt(operandA);
-      default:
-        return 0;
-    }
-  }
-
-  String get format {
-    switch (operation) {
-      case Operation.addition:
-        return '$operandA + $operandB';
-      case Operation.subtraction:
-        return '$operandA - $operandB';
-      case Operation.multiplication:
-        return '$operandA * $operandB';
-      case Operation.division:
-        return '$operandA / $operandB';
-      case Operation.sqrt:
-        return 'sqrt($operandA)';
-      default:
-        return '';
-    }
-  }
+  num get value => operation.oper(operandB)(operandA);
+  String get format => operation.format(operandB)(operandA);
 
   ///
   /// User sets operation.

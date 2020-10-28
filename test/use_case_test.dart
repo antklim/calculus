@@ -1,3 +1,4 @@
+import 'package:calculus/calculus/operation.dart';
 import 'package:calculus/calculus/use_case.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -5,16 +6,11 @@ void main() {
   group('Calculator use case', () {
     group('calculates value of', () {
       Map<CalculatorUseCase, num> testCases = {
-        CalculatorUseCase(
-            operation: Operation.addition, operandA: 1, operandB: 2): 3,
-        CalculatorUseCase(
-            operation: Operation.subtraction, operandA: 1, operandB: 2): -1,
-        CalculatorUseCase(
-            operation: Operation.multiplication, operandA: 1, operandB: 2): 2,
-        CalculatorUseCase(
-            operation: Operation.division, operandA: 1, operandB: 2): 0.5,
-        CalculatorUseCase(operation: Operation.sqrt, operandA: 1, operandB: 2):
-            1,
+        CalculatorUseCase(operation: Add, operandA: 1, operandB: 2): 3,
+        CalculatorUseCase(operation: Sub, operandA: 1, operandB: 2): -1,
+        CalculatorUseCase(operation: Mul, operandA: 1, operandB: 2): 2,
+        CalculatorUseCase(operation: Div, operandA: 1, operandB: 2): 0.5,
+        CalculatorUseCase(operation: Sqrt, operandA: 1, operandB: 2): 1,
       };
       testCases.forEach((useCase, expected) {
         test('${useCase.operation}', () {
@@ -25,20 +21,11 @@ void main() {
 
     group('formats', () {
       Map<CalculatorUseCase, String> testCases = {
-        CalculatorUseCase(
-            operation: Operation.addition, operandA: 1, operandB: 2): '1 + 2',
-        CalculatorUseCase(
-            operation: Operation.subtraction,
-            operandA: 1,
-            operandB: 2): '1 - 2',
-        CalculatorUseCase(
-            operation: Operation.multiplication,
-            operandA: 1,
-            operandB: 2): '1 * 2',
-        CalculatorUseCase(
-            operation: Operation.division, operandA: 1, operandB: 2): '1 / 2',
-        CalculatorUseCase(operation: Operation.sqrt, operandA: 1, operandB: 2):
-            'sqrt(1)',
+        CalculatorUseCase(operation: Add, operandA: 1, operandB: 2): '1 + 2',
+        CalculatorUseCase(operation: Sub, operandA: 1, operandB: 2): '1 - 2',
+        CalculatorUseCase(operation: Mul, operandA: 1, operandB: 2): '1 * 2',
+        CalculatorUseCase(operation: Div, operandA: 1, operandB: 2): '1 / 2',
+        CalculatorUseCase(operation: Sqrt, operandA: 1, operandB: 2): 'sqrt(1)',
       };
       testCases.forEach((useCase, expected) {
         test('${useCase.operation}', () {
@@ -48,17 +35,17 @@ void main() {
     });
 
     test('sets operation', () {
-      CalculatorUseCase useCase = CalculatorUseCase(
-          operation: Operation.addition, operandA: 1, operandB: 2);
+      CalculatorUseCase useCase =
+          CalculatorUseCase(operation: Add, operandA: 1, operandB: 2);
 
       expect(useCase.value, 3);
-      useCase.setOperation(Operation.subtraction);
+      useCase.setOperation(Sub);
       expect(useCase.value, -1);
     });
 
     test('sets operands', () {
-      CalculatorUseCase useCase = CalculatorUseCase(
-          operation: Operation.addition, operandA: 1, operandB: 2);
+      CalculatorUseCase useCase =
+          CalculatorUseCase(operation: Add, operandA: 1, operandB: 2);
 
       expect(useCase.operandA, 1);
       expect(useCase.operandB, 2);
@@ -73,8 +60,8 @@ void main() {
     });
 
     test('sets operands from memory', () {
-      CalculatorUseCase useCase = CalculatorUseCase(
-          operation: Operation.addition, operandA: 1, operandB: 2);
+      CalculatorUseCase useCase =
+          CalculatorUseCase(operation: Add, operandA: 1, operandB: 2);
 
       expect(useCase.operandA, 1);
       expect(useCase.operandB, 2);
@@ -94,8 +81,8 @@ void main() {
     });
 
     test('manages memory', () {
-      CalculatorUseCase useCase = CalculatorUseCase(
-          operation: Operation.addition, operandA: 1, operandB: 2);
+      CalculatorUseCase useCase =
+          CalculatorUseCase(operation: Add, operandA: 1, operandB: 2);
 
       expect(useCase.memory, null);
       useCase.memorise();

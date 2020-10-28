@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'operation.dart';
 import 'use_case.dart';
 
 class CalculusScreen extends StatefulWidget {
@@ -82,13 +83,7 @@ class CalculatorInput extends StatefulWidget {
 }
 
 class _CalculatorInputState extends State<CalculatorInput> {
-  final operations = <Operation, String>{
-    Operation.addition: 'Addition',
-    Operation.subtraction: 'Subtraction',
-    Operation.multiplication: 'Multiplication',
-    Operation.division: 'Division',
-    Operation.sqrt: 'Square root',
-  };
+  final operations = <Operation>[Add, Sub, Mul, Div, Sqrt];
 
   void onOperationChanged(Operation newOperation) {
     widget.useCase.setOperation(newOperation);
@@ -112,9 +107,9 @@ class _CalculatorInputState extends State<CalculatorInput> {
               Text('Operation', style: Theme.of(context).textTheme.bodyText2),
               DropdownButton(
                 value: widget.useCase.operation,
-                items: operations.entries
-                    .map((entry) => DropdownMenuItem(
-                        child: Text(entry.value), value: entry.key))
+                items: operations
+                    .map((entry) =>
+                        DropdownMenuItem(child: Text(entry.name), value: entry))
                     .toList(),
                 onChanged: onOperationChanged,
               ),
@@ -125,7 +120,7 @@ class _CalculatorInputState extends State<CalculatorInput> {
               operand: Operand.A,
               useCase: widget.useCase,
               onChanged: onOperandChanged),
-          widget.useCase.operation == Operation.sqrt
+          widget.useCase.operation == Sqrt
               ? SizedBox(height: 68)
               : OperandInput(
                   label: 'Operand B',
