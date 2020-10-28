@@ -1,6 +1,9 @@
 import 'dart:math';
 
+import 'package:flutter/material.dart';
+
 enum Operation { addition, subtraction, division, multiplication, sqrt }
+enum Operand { A, B }
 
 class CalculatorUseCase {
   num memory;
@@ -57,6 +60,18 @@ class CalculatorUseCase {
   void setOperation(Operation value) {
     operation = value;
   }
+
+  num operandValue(Operand operand) =>
+      (operand == Operand.A) ? operandA : operandB;
+
+  void _setOperandA(num v) => operandA = v;
+  void _setOperandB(num v) => operandB = v;
+
+  ///
+  /// User sets new operand value.
+  ///
+  ValueChanged<num> setOperand(Operand operand) =>
+      (operand == Operand.A) ? _setOperandA : _setOperandB;
 
   ///
   /// User saves operation result to memory

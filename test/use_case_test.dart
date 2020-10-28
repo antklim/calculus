@@ -56,6 +56,17 @@ void main() {
       expect(useCase.value, -1);
     });
 
+    test('sets operands', () {
+      CalculatorUseCase useCase = CalculatorUseCase(
+          operation: Operation.addition, operandA: 1, operandB: 2);
+
+      expect(useCase.value, 3);
+      useCase.setOperand(Operand.A)(4);
+      expect(useCase.value, 6);
+      useCase.setOperand(Operand.B)(6);
+      expect(useCase.value, 10);
+    });
+
     test('manages memory', () {
       CalculatorUseCase useCase = CalculatorUseCase(
           operation: Operation.addition, operandA: 1, operandB: 2);
