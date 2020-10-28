@@ -55,5 +55,16 @@ void main() {
       useCase.setOperation(Operation.subtraction);
       expect(useCase.value, -1);
     });
+
+    test('manages memory', () {
+      CalculatorUseCase useCase = CalculatorUseCase(
+          operation: Operation.addition, operandA: 1, operandB: 2);
+
+      expect(useCase.memory, null);
+      useCase.memorise();
+      expect(useCase.memory, 3);
+      useCase.resetMemory();
+      expect(useCase.memory, null);
+    });
   });
 }

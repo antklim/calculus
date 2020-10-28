@@ -3,6 +3,7 @@ import 'dart:math';
 enum Operation { addition, subtraction, division, multiplication, sqrt }
 
 class CalculatorUseCase {
+  num memory;
   Operation operation;
   num operandA;
   num operandB;
@@ -51,5 +52,19 @@ class CalculatorUseCase {
   ///
   void setOperation(Operation value) {
     operation = value;
+  }
+
+  ///
+  /// User saves operation result to memory
+  ///
+  void memorise() {
+    memory = value;
+  }
+
+  ///
+  /// User resets memory
+  ///
+  void resetMemory() {
+    memory = null;
   }
 }
