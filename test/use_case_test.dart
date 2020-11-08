@@ -48,8 +48,10 @@ void main() {
           onMemoryChanged: onMemoryChanged,
           onOperationChanged: onOperationChanged);
 
+      expect(useCase.operation, Add);
       expect(useCase.value, 3);
       useCase.setOperation(Sub);
+      expect(useCase.operation, Sub);
       expect(useCase.value, -1);
       expect(memoryChanged, false);
       expect(operationChanged, true);
